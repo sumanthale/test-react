@@ -1,13 +1,15 @@
-import { isOpen } from './your-file';
+import React from "react";
+import { render } from "@testing-library/react";
+import { BootstrapTooltip } from "./BootstrapTooltip";
 
-describe('isOpen', () => {
-  it('returns true when the element status is "success"', () => {
-    const element = { status: 'success' };
-    expect(isOpen(element)).toBe(true);
-  });
-
-  it('returns false when the element status is not "success"', () => {
-    const element = { status: 'failure' };
-    expect(isOpen(element)).toBe(false);
+describe("BootstrapTooltip", () => {
+  it("renders tooltip with arrow color black and background color black", () => {
+    const { getByTestId } = render(
+      <BootstrapTooltip title="Test Tooltip" data-testid="tooltip" />
+    );
+    const tooltip = getByTestId("tooltip");
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveStyle("color: #000000");
+    expect(tooltip).toHaveStyle("background-color: #000000");
   });
 });
