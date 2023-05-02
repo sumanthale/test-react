@@ -1,0 +1,13 @@
+import { isOpen } from './your-file';
+
+describe('isOpen', () => {
+  it('returns true when the element status is "success"', () => {
+    const element = { status: 'success' };
+    expect(isOpen(element)).toBe(true);
+  });
+
+  it('returns false when the element status is not "success"', () => {
+    const element = { status: 'failure' };
+    expect(isOpen(element)).toBe(false);
+  });
+});
