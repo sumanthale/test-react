@@ -1,15 +1,24 @@
 import React from "react";
-import { render } from "@testing-library/react";
-import { BootstrapTooltip } from "./BootstrapTooltip";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Tooltip from "./Tooltip";
 
-describe("BootstrapTooltip", () => {
-  it("renders tooltip with arrow color black and background color black", () => {
-    const { getByTestId } = render(
-      <BootstrapTooltip title="Test Tooltip" data-testid="tooltip" />
-    );
-    const tooltip = getByTestId("tooltip");
-    expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveStyle("color: #000000");
-    expect(tooltip).toHaveStyle("background-color: #000000");
+describe("Tooltip", () => {
+  it("renders the tooltip text when hovered over", () => {
+    render(<Tooltip text="Hello, world!" />);
+    const targetElement = screen.getByText(/hover over me/i);
+    userEvent.hover(targetElement);
+    const tooltipElement = screen.getByText(/hello, world!/i);
+    expect(tooltipElement).toBeInTheDocument();
+  });
+
+  it("hides the tooltip text when mouse leaves the target element", () => {
+    render(<Tooltip text="Hello, world!" />);
+    const targetElement = screen.getByText(/hover over me/i);
+    userEvent.hover(targetElement);
+    const tooltipElement = screen.getByText(/hello, world!/i);
+    expect(tooltipElement).toBeInTheDocument();
+    userEvent.unhover(targetElement);
+    expect(tooltipElement).not.toBeInTheDocument();
   });
 });
