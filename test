@@ -1,39 +1,45 @@
-// Import the function to be tested and Axios
-import { fetchData } from './api';
-import axios from 'axios';
-
-// Mock the Axios module
-jest.mock('axios');
-
-// Define the test suite
-describe('fetchData', () => {
-  // Define a test case for a successful API call
-  it('returns data from the API', async () => {
-    // Define a mock response from the API
-    const response = { data: { message: 'Hello, World!' } };
-
-    // Set up the mock Axios request to return the mock response
-    axios.get.mockResolvedValue(response);
-
-    // Call the fetchData function with a mock URL
-    const data = await fetchData('https://example.com/api');
-
-    // Expect the returned data to match the mock response
-    expect(data).toEqual(response.data);
-  });
-
-  // Define a test case for a failed API call
-  it('handles API errors', async () => {
-    // Define a mock error message
-    const error = { message: 'API request failed.' };
-
-    // Set up the mock Axios request to throw an error
-    axios.get.mockRejectedValue(error);
-
-    // Call the fetchData function with a mock URL
-    const data = await fetchData('https://example.com/api');
-
-    // Expect the returned data to be null (indicating an error)
-    expect(data).toBeNull();
-  });
-});
+<html>
+<head>
+  <script type="text/javascript">
+    function enableSubmit() {
+      var yesRadio = document.getElementById("yesRadio");
+      var noRadio = document.getElementById("noRadio");
+      var submitButton = document.getElementById("submitButton");
+      
+      if (yesRadio.checked || noRadio.checked) {
+        submitButton.disabled = false;
+      } else {
+        submitButton.disabled = true;
+      }
+    }
+    
+    function submitForm() {
+      var selectedOption;
+      var yesRadio = document.getElementById("yesRadio");
+      
+      if (yesRadio.checked) {
+        selectedOption = "Yes";
+      } else {
+        selectedOption = "No";
+      }
+      
+      // Call your function with the selected radio button value here
+      // Example: YourFunction(selectedOption);
+      alert("Selected option: " + selectedOption);
+    }
+  </script>
+</head>
+<body>
+  <form>
+    <label>
+      <input type="radio" id="yesRadio" name="option" onclick="enableSubmit()" /> Yes
+    </label>
+    <br />
+    <label>
+      <input type="radio" id="noRadio" name="option" onclick="enableSubmit()" /> No
+    </label>
+    <br />
+    <input type="submit" id="submitButton" value="Submit" disabled="disabled" onclick="submitForm()" />
+  </form>
+</body>
+</html>
