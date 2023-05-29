@@ -1,45 +1,44 @@
-<html>
-<head>
-  <script type="text/javascript">
-    function enableSubmit() {
-      var yesRadio = document.getElementById("yesRadio");
-      var noRadio = document.getElementById("noRadio");
-      var submitButton = document.getElementById("submitButton");
-      
-      if (yesRadio.checked || noRadio.checked) {
-        submitButton.disabled = false;
-      } else {
-        submitButton.disabled = true;
-      }
+function concatenateValues(arr) {
+  const result = [];
+
+  // Create an object to store the concatenated values for each key
+  const valuesByKeys = {};
+
+  // Iterate over the input array
+  for (let i = 0; i < arr.length; i++) {
+    const obj = arr[i];
+    const key = obj.key;
+    const value = obj.value;
+
+    // Check if the key already exists in the valuesByKeys object
+    if (valuesByKeys.hasOwnProperty(key)) {
+      // If the key exists, concatenate the value with the existing value
+      valuesByKeys[key] += value;
+    } else {
+      // If the key doesn't exist, initialize it with the current value
+      valuesByKeys[key] = value;
     }
-    
-    function submitForm() {
-      var selectedOption;
-      var yesRadio = document.getElementById("yesRadio");
-      
-      if (yesRadio.checked) {
-        selectedOption = "Yes";
-      } else {
-        selectedOption = "No";
-      }
-      
-      // Call your function with the selected radio button value here
-      // Example: YourFunction(selectedOption);
-      alert("Selected option: " + selectedOption);
+  }
+
+  // Iterate over the keys in valuesByKeys and create the result array
+  for (const key in valuesByKeys) {
+    if (valuesByKeys.hasOwnProperty(key)) {
+      // Create an object with the key and concatenated value
+      const newObj = { key: key, value: valuesByKeys[key] };
+      result.push(newObj);
     }
-  </script>
-</head>
-<body>
-  <form>
-    <label>
-      <input type="radio" id="yesRadio" name="option" onclick="enableSubmit()" /> Yes
-    </label>
-    <br />
-    <label>
-      <input type="radio" id="noRadio" name="option" onclick="enableSubmit()" /> No
-    </label>
-    <br />
-    <input type="submit" id="submitButton" value="Submit" disabled="disabled" onclick="submitForm()" />
-  </form>
-</body>
-</html>
+  }
+
+  return result;
+}
+
+// Example usage
+const inputArray = [
+  { key: 'A', value: 'Hello' },
+  { key: 'B', value: 'World' },
+  { key: 'A', value: ' OpenAI' },
+  { key: 'B', value: '!' },
+];
+
+const newArray = concatenateValues(inputArray);
+console.log(newArray);
