@@ -1,44 +1,10 @@
-function concatenateValues(arr) {
-  const result = [];
 
-  // Create an object to store the concatenated values for each key
-  const valuesByKeys = {};
-
-  // Iterate over the input array
-  for (let i = 0; i < arr.length; i++) {
-    const obj = arr[i];
-    const key = obj.key;
-    const value = obj.value;
-
-    // Check if the key already exists in the valuesByKeys object
-    if (valuesByKeys.hasOwnProperty(key)) {
-      // If the key exists, concatenate the value with the existing value
-      valuesByKeys[key] += value;
-    } else {
-      // If the key doesn't exist, initialize it with the current value
-      valuesByKeys[key] = value;
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("https://frontend.com")  // Replace with your frontend origin
+                .allowedMethods("GET", "POST", "PUT", "DELETE")  // Allow HTTP methods as needed
+                .allowedHeaders("*")  // Allow all headers
+                .allowCredentials(true)  // If using credentials like cookies or auth headers
+                .maxAge(3600);  // Cache the response for 1 hour
     }
-  }
-
-  // Iterate over the keys in valuesByKeys and create the result array
-  for (const key in valuesByKeys) {
-    if (valuesByKeys.hasOwnProperty(key)) {
-      // Create an object with the key and concatenated value
-      const newObj = { key: key, value: valuesByKeys[key] };
-      result.push(newObj);
-    }
-  }
-
-  return result;
-}
-
-// Example usage
-const inputArray = [
-  { key: 'A', value: 'Hello' },
-  { key: 'B', value: 'World' },
-  { key: 'A', value: ' OpenAI' },
-  { key: 'B', value: '!' },
-];
-
-const newArray = concatenateValues(inputArray);
-console.log(newArray);
