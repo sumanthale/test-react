@@ -1,9 +1,33 @@
-  private static String generateRandomSuffix(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder suffix = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * chars.length());
-            suffix.append(chars.charAt(index));
-        }
-        return suffix.toString();
-    }
+async function clearSiteData() {
+  // Clear local & session storage
+  localStorage.clear();
+  sessionStorage.clear();
+
+  // Delete all cookies
+  document.cookie.split(';').forEach(cookie => {
+    document.cookie = cookie
+      .replace(/^ +/, '')
+      .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+  });
+
+  // Delete IndexedDB
+  if ('indexedDB' in window) {
+    const dbs = await indexedDB.databases();
+    dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+  }
+
+  // Delete Cache API
+  if ('caches' in window) {
+    const names = await caches.keys();
+    names.forEach(name => caches.delete(name));
+  }
+
+  // Unregister service workers
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    registrations.forEach(reg => reg.unregister());
+  }
+
+  console.log('Site data cleared (where possible via JS)');
+}
+clearSiteData().then(() => location.reload());
