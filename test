@@ -1,33 +1,46 @@
+// Example: Injected at build time
+const CURRENT_RELEASE_ID = "v1.2.5"; // Change this every deployment
+
+
 async function clearSiteData() {
-  // Clear local & session storage
   localStorage.clear();
   sessionStorage.clear();
 
-  // Delete all cookies
   document.cookie.split(';').forEach(cookie => {
     document.cookie = cookie
       .replace(/^ +/, '')
       .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
   });
 
-  // Delete IndexedDB
   if ('indexedDB' in window) {
     const dbs = await indexedDB.databases();
     dbs.forEach(db => indexedDB.deleteDatabase(db.name));
   }
 
-  // Delete Cache API
   if ('caches' in window) {
     const names = await caches.keys();
     names.forEach(name => caches.delete(name));
   }
 
-  // Unregister service workers
   if ('serviceWorker' in navigator) {
     const registrations = await navigator.serviceWorker.getRegistrations();
     registrations.forEach(reg => reg.unregister());
   }
 
-  console.log('Site data cleared (where possible via JS)');
+  console.log('[🔥] Cleared site data due to release update');
 }
-clearSiteData().then(() => location.reload());
+
+async function clearOnReleaseChange(currentVersion: string) {
+  const STORED_KEY = 'app_release_id';
+  const previousVersion = localStorage.getItem(STORED_KEY);
+
+  if (previousVersion !== currentVersion) {
+    console.log(`[🆕] Detected new release: ${previousVersion} → ${currentVersion}`);
+    await clearSiteData();
+    localStorage.setItem(STORED_KEY, currentVersion);
+    location.reload(); // or redirect to login/home
+  } else {
+    console.log(`[✅] Release up-to-date: ${currentVersion}`);
+  }
+}
+clearOnReleaseChange(CURRENT_RELEASE_ID);
