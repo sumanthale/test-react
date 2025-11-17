@@ -1,7 +1,7 @@
 <%@ page language="java" %>
 <%@ page buffer="8kb" %>
 <%@ page import="com.gecs.apollo.wkst.util.ApolloCustomerServiceUtility" %>
-<%@ include file="ApolloCommon.jsp" %>
+<%@ include file="ApolloCommon.jsp"%>
 <%@ taglib uri="/WEB-INF/lib/apollo.tld" prefix="apollo" %>
 
 <%!
@@ -12,7 +12,7 @@
     String actionPath = null;
 
     public void jspInit() {
-        ApollocustomerServiceUtility apolloCSUtility = ApolloCustomerServiceUtility.getInstance();
+        ApolloCustomerServiceUtility apolloCSUtility = ApolloCustomerServiceUtility.getInstance();
         image = apolloCSUtility.getCSImagePath();
         css = apolloCSUtility.getCSStandardCSS();
         js = apolloCSUtility.getCSJSPath();
@@ -48,7 +48,7 @@
             parent.closeDialog();
         }
 
-        function clickok(frm) {
+        function clickOk(frm) {
             var data = {
                 "yesFlag" : document.getElementById('yesFlag').value,
                 "noFlag" : document.getElementById('noFlag').value,
@@ -67,11 +67,11 @@
     <!-- Chrome Changes End issue #160 -->
 </head>
 
-<apollo:body bgcolor="#FFFFFF" topmargin="0" leftmargin="0" cellspacing="0" cellpadding="0">
-    <apollo:form name="formDtechDetails" method="post" />
+<apollo:body bgcolor="#FFFFFF" topmargin="0" leftmargin="0" cellspacing="0" cellpadding="0" class="blueBackground">
+    <apollo:form name="formDtechDetails" method="post">
 
     <br/>
-    <div style="" align="center">
+    <div align="center">
         <div class="row_d" style="margin-bottom:10px; margin-left:8px;">
             <div class="row_d_fixed" style="font-family:arial; font-size:13px;" align="left">Has all the trouble shooting completed and incident ticket opened?</div>
         </div>
@@ -86,12 +86,12 @@
         </div>
 
         <div style="height:50px;width:100%;" align="center">
-            <apollo:input type="button" name="dtechDetailsSubmit" value="Submit" disabled="true" id="okButton" style="margin-right:65px;" class="blueButton" onclick="clickok(this.form)"/>
-            <apollo:input type="button" name="Cancel" value="Cancel" class="blueButton" onclick="clickCancel()"/>
+            <apollo:input type="button" name="dtechDetailsSubmit" value="Submit" disabled="true" id="okButton" style="margin-right:65px;" class="blueButton" onClick="clickOk(this.form)"/>
+            <apollo:input type="button" name="Cancel" value="Cancel" class="blueButton" onClick="clickCancel()"/>
         </div>
     </div>
 
-    </form>
+    </apollo:form>
 </apollo:body>
 
 </html>
