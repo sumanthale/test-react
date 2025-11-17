@@ -34,77 +34,177 @@
     <link rel="stylesheet" href="<%= css %>">
     <title>Payment Details</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <!-- Chrome Changes Start issue #160 -->
+
+    <!-- Compact, minimal UI + #006899 theme -->
     <style>
-        textarea::placeholder {
-            text-align: center;
-            line-height: 30px;
+        body { font-family: "Inter", Arial, Helvetica, sans-serif; }
+
+        .dtech-modal {
+            width: 620px;
+            max-width: 94%;
+            background: #fff;
+            border-radius: 8px;
+            padding: 18px 20px;
+            box-sizing: border-box;
+            color: #222;
+            box-shadow: 0 10px 30px rgba(18, 38, 63, 0.08);
+        }
+
+        .dtech-header { font-size: 20px; font-weight: 700; margin: 0 0 8px; color:#111; }
+        .dtech-divider { height:1px; background:#eef2f4; border:none; margin-bottom:14px; }
+
+        .dtech-question { font-size:15.5px; font-weight:600; margin-bottom:10px; color:#1f2933; }
+
+        .dtech-radio-row { display:flex; gap:26px; align-items:center; margin-bottom:12px; }
+
+        .radio-wrapper { display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; font-size:15px; color:#24303a; }
+
+        /* custom radio using #006899 */
+        .radio-input {
+            appearance:none; -webkit-appearance:none;
+            width:20px; height:20px; border-radius:50%;
+            border:2px solid rgba(0,104,153,0.35); background:#fff; position:relative; box-sizing:border-box;
+            transition: all .12s ease;
+        }
+        .radio-input::after {
+            content:""; position:absolute; left:50%; top:50%;
+            width:10px; height:10px; border-radius:50%;
+            background:#006899; transform:translate(-50%,-50%) scale(0); transition:transform .12s ease;
+        }
+        .radio-input:checked { border-color:#006899; }
+        .radio-input:checked::after { transform:translate(-50%,-50%) scale(1); }
+        .radio-input:focus { box-shadow:0 0 0 4px rgba(0,104,153,0.14); outline:none; }
+
+        .warning-text { display:none; color:#C62828; font-size:14px; font-weight:600; margin:8px 0 10px; }
+
+        .notes-label-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+        .notes-label { font-size:15px; font-weight:600; }
+        .notes-counter { font-size:13px; color:#88929a; }
+
+        .notes-box { border:1px solid #e6ebee; border-radius:6px; padding:10px; }
+        textarea#noteSectionId { width:100%; height:100px; border:none; font-size:14px; resize:vertical; outline:none; }
+        textarea::placeholder { color:#cfd8dc; font-size:16px; }
+
+        .dtech-footer { display:flex; justify-content:flex-end; gap:12px; margin-top:16px; }
+
+        .btn-cancel {
+            background:#fff; color:#006899; border:1px solid #006899; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:14px;
+        }
+        .btn-cancel:hover { background: rgba(0,104,153,0.06); }
+
+        .btn-submit {
+            background:#006899; color:#fff; padding:9px 16px; border-radius:8px; cursor:pointer; border:none; font-size:14px;
+        }
+        .btn-submit:hover { background:#00557A; }
+        .btn-submit[disabled] { opacity:0.55; cursor:not-allowed; }
+
+        /* small responsive tweak */
+        @media (max-width:700px) {
+            .dtech-modal { padding:14px; }
+            .dtech-question { font-size:15px; }
         }
     </style>
 
-    <script language="JavaScript">
-        function clickCancel() {
-            window.returnValue = true;
-            parent.closeDialog();
-        }
-
-        function clickOk(frm) {
-            var data = {
-                "yesFlag": document.getElementById('yesFlag') ? document.getElementById('yesFlag').value : '',
-                "noFlag": document.getElementById('noFlag') ? document.getElementById('noFlag').value : '',
-                "noteSectionId": document.getElementById('noteSectionId') ? document.getElementById('noteSectionId').value : ''
-            };
-
-            window.returnValue = data;
-            parent.closeDialog();
-        }
-
-        function enableSubmit() {
-            var btn = document.getElementById('okButton');
-            if (btn) {
-                btn.removeAttribute('disabled');
+    <!-- Only implement show/hide helper here — do NOT re-implement existing functions -->
+    <script type="text/javascript">
+        // toggleWarning: only responsible for show/hide message when user selects No/Yes
+        function toggleWarning() {
+            var noRadio = document.getElementById('noFlag');
+            var warn = document.getElementById('warningText');
+            if (!warn) return;
+            if (noRadio && noRadio.checked) {
+                warn.style.display = 'block';
+            } else {
+                warn.style.display = 'none';
             }
         }
+
+        // If you have a counter function implemented externally (updateNoteCounter),
+        // keep calling it if present; otherwise this is a noop.
+        function tryUpdateCounter() {
+            if (typeof updateNoteCounter === 'function') {
+                updateNoteCounter();
+            } else {
+                // fallback: simple counter update here (non-invasive)
+                var note = document.getElementById('noteSectionId');
+                var counter = document.getElementById('notesCounter');
+                if (!note || !counter) return;
+                var max = 1000;
+                if (note.value.length > max) note.value = note.value.substring(0, max);
+                counter.textContent = note.value.length + '/' + max;
+            }
+        }
+
+        // Wire initial state when DOM ready, but do not overwrite existing functions
+        document.addEventListener('DOMContentLoaded', function () {
+            // initialize warning state based on preselected radio (if any)
+            toggleWarning();
+            // update counter initially
+            tryUpdateCounter();
+
+            // ensure textarea input updates counter (works with external function if present)
+            var note = document.getElementById('noteSectionId');
+            if (note) {
+                note.addEventListener('input', tryUpdateCounter);
+            }
+
+            // If radios are pre-checked, ensure submit is enabled by calling existing enableSubmit if available
+            try {
+                if (typeof enableSubmit === 'function') {
+                    var yes = document.getElementById('yesFlag'), no = document.getElementById('noFlag');
+                    if ((yes && yes.checked) || (no && no.checked)) enableSubmit();
+                }
+            } catch (e) { /* ignore */ }
+        });
     </script>
+
     <script language="javascript" type="text/javascript" src="<%= js %>jquery-1.7.1.min.js"></script>
-    <!-- Chrome Changes End issue #160 -->
 </head>
 
 <apollo:body bgcolor="#FFFFFF" topmargin="0" leftmargin="0" cellspacing="0" cellpadding="0" class="blueBackground">
     <apollo:form name="formDtechDetails" method="post">
 
-        <br/>
-        <div align="center">
-            <div class="row_d" style="margin-bottom:10px; margin-left:8px;">
-                <div class="row_d_fixed" style="font-family:arial; font-size:13px;" align="left">
-                    Has all the trouble shooting completed and incident ticket opened?
-                </div>
+        <div class="dtech-modal" role="dialog" aria-labelledby="dtechTitle">
+            <h2 id="dtechTitle" class="dtech-header">DTECH Details</h2>
+            <hr class="dtech-divider" />
+
+            <div class="dtech-question">Has all the trouble shooting completed &amp; incident ticket opened?</div>
+
+            <div class="dtech-radio-row" aria-controls="noteSectionId">
+                <!-- keep existing IDs and call your existing enableSubmit(), then our local toggleWarning() -->
+                <label class="radio-wrapper">
+                    <input class="radio-input" type="radio" id="yesFlag" name="clickFlag" value="yes"
+                           onclick="if(typeof enableSubmit==='function'){enableSubmit();} toggleWarning();" />
+                    <span>Yes</span>
+                </label>
+
+                <label class="radio-wrapper">
+                    <input class="radio-input" type="radio" id="noFlag" name="clickFlag" value="no"
+                           onclick="if(typeof enableSubmit==='function'){enableSubmit();} toggleWarning();" />
+                    <span>No</span>
+                </label>
             </div>
 
-            <div class="row_d" style="margin-bottom:20px;margin-left:18px;">
-                <div class="row_d_fixed bodyText" style="margin-left:48px;">
-                    <input type="radio" id="yesFlag" name="clickFlag" value="yes" onclick="enableSubmit()"/>Yes
-                </div>
-                <div class="row_d_fixed bodyText" style="margin-left:48px;">
-                    <input type="radio" id="noFlag" name="clickFlag" value="no" onclick="enableSubmit()"/>No
-                </div>
+            <!-- warning message shown only when user clicks 'No' -->
+            <div id="warningText" class="warning-text">Please provide the reason for selecting "No".</div>
+
+            <div class="notes-label-row">
+                <div class="notes-label">Notes Section</div>
+                <div id="notesCounter" class="notes-counter">0/1000</div>
             </div>
 
-            <br/>
-
-            <div class="row_d" style="margin-bottom:10px; margin-left:8px;">
-                <div class="row_d_fixed" style="font-family:arial; font-size:13px;" align="left">
-                    <textarea name="note" id="noteSectionId" placeholder="Note Section" rows="2" cols="59"></textarea>
-                </div>
+            <div class="notes-box">
+                <!-- keep ID the same -->
+                <textarea name="note" id="noteSectionId" placeholder="Placeholder" rows="4" cols="60" maxlength="1000"></textarea>
             </div>
 
-            <div style="height:50px;width:100%;" align="center">
-                <apollo:input type="button" name="dtechDetailsSubmit" value="Submit" disabled="true" id="okButton" style="margin-right:65px;" class="blueButton" onclick="clickOk(this.form)"/>
-                <apollo:input type="button" name="Cancel" value="Cancel" class="blueButton" onclick="clickCancel()"/>
+            <div class="dtech-footer">
+                <!-- keep apollo:input + ids same so existing backend behaviour stays intact -->
+                <apollo:input type="button" name="Cancel" value="Cancel" class="btn-cancel" onclick="if(typeof clickCancel==='function'){clickCancel();}" />
+                <apollo:input type="button" name="dtechDetailsSubmit" value="Submit" disabled="true" id="okButton" class="btn-submit" onclick="if(typeof clickOk==='function'){clickOk(this.form);}"/>
             </div>
         </div>
 
     </apollo:form>
 </apollo:body>
-
 </html>
