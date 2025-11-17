@@ -1,46 +1,97 @@
-// Example: Injected at build time
-const CURRENT_RELEASE_ID = "v1.2.5"; // Change this every deployment
+<%@ page language="java" %>
+<%@ page buffer="8kb" %>
+<%@ page import="com.gecs.apollo.wkst.util.ApolloCustomerServiceUtility" %>
+<%@ include file="ApolloCommon.jsp" %>
+<%@ taglib uri="/WEB-INF/lib/apollo.tld" prefix="apollo" %>
 
+<%!
+    String image = null;
+    String css = null;
+    String js = null;
+    String jsp = null;
+    String actionPath = null;
 
-async function clearSiteData() {
-  localStorage.clear();
-  sessionStorage.clear();
+    public void jspInit() {
+        ApollocustomerServiceUtility apolloCSUtility = ApolloCustomerServiceUtility.getInstance();
+        image = apolloCSUtility.getCSImagePath();
+        css = apolloCSUtility.getCSStandardCSS();
+        js = apolloCSUtility.getCSJSPath();
+        jsp = apolloCSUtility.getCSJSPPath();
+        actionPath = apolloCSUtility.getCSActionPath();
+    }
 
-  document.cookie.split(';').forEach(cookie => {
-    document.cookie = cookie
-      .replace(/^ +/, '')
-      .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
-  });
+    public void jspDestroy() {
+        image = null;
+        css = null;
+        js = null;
+        jsp = null;
+        actionPath = null;
+    }
+%>
 
-  if ('indexedDB' in window) {
-    const dbs = await indexedDB.databases();
-    dbs.forEach(db => indexedDB.deleteDatabase(db.name));
-  }
+<html>
+<head>
+    <link rel="stylesheet" href="<%= css %>">
+    <title>Payment Details</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <!-- Chrome Changes Start issue #160 -->
+    <style>
+        textarea::placeholder {
+            text-align: center;
+            line-height: 30px;
+        }
+    </style>
 
-  if ('caches' in window) {
-    const names = await caches.keys();
-    names.forEach(name => caches.delete(name));
-  }
+    <SCRIPT language="JavaScript">
+        function clickCancel() {
+            window.returnValue = true;
+            parent.closeDialog();
+        }
 
-  if ('serviceWorker' in navigator) {
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    registrations.forEach(reg => reg.unregister());
-  }
+        function clickok(frm) {
+            var data = {
+                "yesFlag" : document.getElementById('yesFlag').value,
+                "noFlag" : document.getElementById('noFlag').value,
+                "noteSectionId" : document.getElementById('noteSectionId').value
+            }
 
-  console.log('[🔥] Cleared site data due to release update');
-}
+            window.returnValue = data;
+            parent.closeDialog();
+        }
 
-async function clearOnReleaseChange(currentVersion: string) {
-  const STORED_KEY = 'app_release_id';
-  const previousVersion = localStorage.getItem(STORED_KEY);
+        function enableSubmit() {
+            document.getElementById('okButton').removeAttribute('disabled');
+        }
+    </SCRIPT>
+    <script language="javascript" type="text/javascript" src="<%= js %>jquery-1.7.1.min.js"></script>
+    <!-- Chrome Changes End issue #160 -->
+</head>
 
-  if (previousVersion !== currentVersion) {
-    console.log(`[🆕] Detected new release: ${previousVersion} → ${currentVersion}`);
-    await clearSiteData();
-    localStorage.setItem(STORED_KEY, currentVersion);
-    location.reload(); // or redirect to login/home
-  } else {
-    console.log(`[✅] Release up-to-date: ${currentVersion}`);
-  }
-}
-clearOnReleaseChange(CURRENT_RELEASE_ID);
+<apollo:body bgcolor="#FFFFFF" topmargin="0" leftmargin="0" cellspacing="0" cellpadding="0">
+    <apollo:form name="formDtechDetails" method="post" />
+
+    <br/>
+    <div style="" align="center">
+        <div class="row_d" style="margin-bottom:10px; margin-left:8px;">
+            <div class="row_d_fixed" style="font-family:arial; font-size:13px;" align="left">Has all the trouble shooting completed and incident ticket opened?</div>
+        </div>
+        <div class="row_d" style="margin-bottom:20px;margin-left:18px;">
+            <div class="row_d_fixed bodyText" style="margin-left:48px;"><input type="radio" id="yesFlag" name="clickFlag" value="yes" onclick="enableSubmit()"/>Yes</input></div>
+            <div class="row_d_fixed bodyText" style="margin-left:48px;"><input type="radio" id="noFlag" name="clickFlag" value="no" onclick="enableSubmit()"/>No</input></div>
+        </div>
+        <br/>
+
+        <div class="row_d" style="margin-bottom:10px; margin-left:8px;">
+            <div class="row_d_fixed" style="font-family:arial; font-size:13px;" align="left"><textarea name="note" id="noteSectionId" placeholder="Note Section" rows="2" cols="59"></textarea></div>
+        </div>
+
+        <div style="height:50px;width:100%;" align="center">
+            <apollo:input type="button" name="dtechDetailsSubmit" value="Submit" disabled="true" id="okButton" style="margin-right:65px;" class="blueButton" onclick="clickok(this.form)"/>
+            <apollo:input type="button" name="Cancel" value="Cancel" class="blueButton" onclick="clickCancel()"/>
+        </div>
+    </div>
+
+    </form>
+</apollo:body>
+
+</html>
